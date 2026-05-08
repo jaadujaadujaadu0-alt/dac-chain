@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/playwright/python:v1.52.0-jammy
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DISPLAY=:99
+ENV PYTHONPATH=/app
 
 RUN apt-get update && apt-get install -y \
     xvfb \
@@ -30,19 +31,19 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY requirements.txt /app/
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN playwright install
 RUN playwright install chromium
 RUN playwright install-deps
 
-COPY . .
+COPY . /app/
 
 RUN mkdir -p /app/pw-profile
-RUN chmod +x start.sh
+RUN chmod +x /app/start.sh
 
 EXPOSE 8000
 EXPOSE 6080
 
-CMD ["./start.sh"]
+CMD ["/app/start.sh"]
