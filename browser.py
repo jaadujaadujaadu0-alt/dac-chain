@@ -26,6 +26,7 @@ async def boot_browser():
         args=[
             "--no-sandbox",
             "--disable-dev-shm-usage",
+            "--disable-blink-features=AutomationControlled",
             f"--remote-debugging-port={CDP_PORT}",
             f"--disable-extensions-except={EXTENSION_DIR}",
             f"--load-extension={EXTENSION_DIR}",
@@ -69,3 +70,4 @@ async def browser_status():
         "running": True,
         "pages": len(_context.pages)
     }
+    
