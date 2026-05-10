@@ -40,9 +40,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN playwright install chromium
 RUN playwright install-deps
 
-# CORRECT METAMASK BUILD
+# STABLE METAMASK
 RUN wget -O /tmp/metamask.zip \
-    https://github.com/MetaMask/metamask-extension/releases/download/v13.30.0/metamask-chrome-13.30.0-webpack.zip && \
+    https://github.com/MetaMask/metamask-extension/releases/download/v10.34.3/metamask-chrome-10.34.3.zip && \
     mkdir -p /app/metamask-extension && \
     unzip /tmp/metamask.zip -d /app/metamask-extension && \
     rm /tmp/metamask.zip
