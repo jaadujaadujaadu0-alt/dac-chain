@@ -27,25 +27,37 @@ async def boot_browser():
             "--no-sandbox",
             "--disable-dev-shm-usage",
             "--disable-blink-features=AutomationControlled",
+            "--no-first-run",
             f"--disable-extensions-except={EXTENSION_DIR}",
             f"--load-extension={EXTENSION_DIR}",
-            "--no-first-run",
         ],
     )
 
     _context = context
 
-    # close junk tabs
+    await context.wait_for_event("page", timeout=20000)
+
+    bg = None
+    for page in context.pages:
+        if "chrome-extension://" in page.url:
+            bg = page
+            break
+
+    if not bg:
+        raise Exception("MetaMask extension did not load")
+
+    extension_id = bg.url.split("/")[2]
+
     for p in context.pages:
         try:
             await p.close()
         except:
             pass
 
-    # open metamask directly
     metamask = await context.new_page()
+
     await metamask.goto(
-        "chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html",
+        f"chrome-extension://{extension_id}/home.html",
         wait_until="domcontentloaded",
         timeout=60000
     )
@@ -66,10 +78,7 @@ async def browser_status():
     global _context
 
     if _context is None:
-        return {
-            "running": False,
-            "error": "browser not started"
-        }
+        return {"running": False}
 
     return {
         "running": True,
