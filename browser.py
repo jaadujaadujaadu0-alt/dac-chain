@@ -1,6 +1,6 @@
 import os
 from playwright.async_api import async_playwright
-from config import EXTENSION_DIR, USER_DATA_DIR, CDP_PORT, DISPLAY, APP_URL
+from config import EXTENSION_DIR, USER_DATA_DIR, DISPLAY
 
 _playwright = None
 _context = None
@@ -27,23 +27,28 @@ async def boot_browser():
             "--no-sandbox",
             "--disable-dev-shm-usage",
             "--disable-blink-features=AutomationControlled",
-            f"--remote-debugging-port={CDP_PORT}",
             f"--disable-extensions-except={EXTENSION_DIR}",
             f"--load-extension={EXTENSION_DIR}",
+            "--no-first-run",
         ],
     )
 
     _context = context
 
-    page = context.pages[0] if context.pages else await context.new_page()
+    # close junk tabs
+    for p in context.pages:
+        try:
+            await p.close()
+        except:
+            pass
 
-    await page.goto(
-        APP_URL,
+    # open metamask directly
+    metamask = await context.new_page()
+    await metamask.goto(
+        "chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html",
         wait_until="domcontentloaded",
         timeout=60000
     )
-
-    await page.bring_to_front()
 
     return _context
 
@@ -70,4 +75,3 @@ async def browser_status():
         "running": True,
         "pages": len(_context.pages)
     }
-    
